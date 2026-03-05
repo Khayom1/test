@@ -3,79 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Санҷиши Озод - Bozorcha</title>
+    <title>Санҷиши Telegram</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 500px; margin: auto; line-height: 1.6; background-color: #f4f7f6; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #333; font-size: 22px; }
-        button { padding: 14px 24px; background: #ff9800; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
-        button:hover { background: #e68900; transform: translateY(-2px); }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        #result { margin-top: 20px; padding: 15px; border-radius: 8px; min-height: 40px; word-wrap: break-word; font-weight: 500; border: 1px solid #eee; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f4f7f6; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        button { background: #ff9800; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #e68900; }
+        button:disabled { background: #ccc; }
+        #result { margin-top: 20px; padding: 10px; border-radius: 8px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>🚀 Фиристодани паём</h1>
-        <p>Пахш кунед, то ба Telegram хабар равад.</p>
+<div class="card">
+    <h1>🚀 Bozorcha Bot</h1>
+    <button id="sendBtn" onclick="sendTest()">Фиристодани паём</button>
+    <div id="result">Омода барои фиристодан...</div>
+</div>
 
-        <button id="sendBtn" onclick="sendTest()">Фиристодани паём</button>
+<script>
+    const FUNCTION_URL = "https://seagtlaujnnhoyitgsdd.supabase.co/functions/v1/test-function-html";
+    const ANON_KEY = "sb_publishable_OlLChtOja0i8nIrPZuM_Og_vyfGjfsP";
 
-        <div id="result">Омода барои санҷиш...</div>
-    </div>
+    async function sendTest() {
+        const resultDiv = document.getElementById("result");
+        const btn = document.getElementById("sendBtn");
 
-    <script>
-        // Танзимот
-        const SUPABASE_URL = "https://seagtlaujnnhoyitgsdd.supabase.co";
-        const ANON_KEY = "sb_publishable_OlLChtOja0i8nIrPZuM_Og_vyfGjfsP";
-        const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/test-function-html`;
+        btn.disabled = true;
+        resultDiv.innerHTML = "⏳ Дархост рафта истодааст...";
+        resultDiv.style.color = "#007bff";
 
-        async function sendTest() {
-            const resultDiv = document.getElementById("result");
-            const btn = document.getElementById("sendBtn");
-            
-            resultDiv.innerHTML = "⏳ Дархост рафта истодааст...";
-            resultDiv.style.color = "#007bff";
-            resultDiv.style.backgroundColor = "transparent";
-            btn.disabled = true;
+        try {
+            const response = await fetch(FUNCTION_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": ANON_KEY,
+                    "Authorization": `Bearer ${ANON_KEY}`
+                },
+                body: JSON.stringify({ 
+                    message: "🔔 Салом! Ин паём бе воридшавӣ фиристода шуд." 
+                })
+            });
 
-            try {
-                // Фиристодани дархост БЕ санҷиши Auth Session
-                const response = await fetch(FUNCTION_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "apikey": ANON_KEY,
-                        "Authorization": `Bearer ${ANON_KEY}` // Истифодаи Anon Key ба ҷои User Token
-                    },
-                    body: JSON.stringify({
-                        message: "🔔 Паёми мустақим бе воридшавӣ!",
-                        user_name: "Меҳмони сомона",
-                        chat_id: "test_channel_001"
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || `Хатогии сервер: ${response.status}`);
-                }
-
-                resultDiv.innerHTML = "✅ Муваффақият! Паём ба Telegram расид.";
-                resultDiv.style.color = "#28a745";
-                resultDiv.style.backgroundColor = "#eafff0";
-
-            } catch (error) {
-                console.error("Error:", error);
-                resultDiv.innerHTML = "❌ Хатогӣ: " + error.message;
-                resultDiv.style.color = "#dc3545";
-                resultDiv.style.backgroundColor = "#fff5f5";
-            } finally {
-                btn.disabled = false;
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Хатогии сервер");
             }
+
+            resultDiv.innerHTML = "✅ Муваффақият! Паём ба Telegram расид.";
+            resultDiv.style.color = "#28a745";
+        } catch (error) {
+            console.error(error);
+            resultDiv.innerHTML = "❌ Хатогӣ: " + error.message;
+            resultDiv.style.color = "#dc3545";
+        } finally {
+            btn.disabled = false;
         }
-    </script>
+    }
+</script>
 
 </body>
 </html>
