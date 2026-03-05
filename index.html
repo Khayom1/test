@@ -3,103 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Санҷиши Edge Function - Bozorcha</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <title>Санҷиши Озод - Bozorcha</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 500px; margin: auto; line-height: 1.6; background-color: #f4f7f6; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #333; font-size: 22px; text-align: center; }
-        button { padding: 14px 24px; background: #ff9800; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; margin-bottom: 10px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #333; font-size: 22px; }
+        button { padding: 14px 24px; background: #ff9800; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
         button:hover { background: #e68900; transform: translateY(-2px); }
         button:disabled { background: #ccc; cursor: not-allowed; }
-        .login-btn { background: #4a90e2; }
-        .login-btn:hover { background: #357abd; }
-        #result { margin-top: 20px; padding: 15px; border-radius: 8px; min-height: 40px; word-wrap: break-word; text-align: center; font-weight: 500; border: 1px solid #eee; }
-        .status-info { font-size: 12px; color: #666; margin-top: 10px; text-align: center; }
-        .user-info { font-size: 13px; color: #28a745; margin-bottom: 15px; text-align: center; display: none; }
+        #result { margin-top: 20px; padding: 15px; border-radius: 8px; min-height: 40px; word-wrap: break-word; font-weight: 500; border: 1px solid #eee; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>🚀 Санҷиши Telegram Bot</h1>
-        
-        <div id="userInfo" class="user-info"></div>
+        <h1>🚀 Фиристодани паём</h1>
+        <p>Пахш кунед, то ба Telegram хабар равад.</p>
 
-        <button id="loginBtn" class="login-btn" onclick="login()">1. Ворид шудан (Login)</button>
-        
-        <button id="sendBtn" onclick="sendTest()" disabled>2. Фиристодани паём</button>
+        <button id="sendBtn" onclick="sendTest()">Фиристодани паём</button>
 
-        <div id="result">Лутфан, аввал тугмаи воридшавиро пахш кунед.</div>
-        <p class="status-info">Эзоҳ: Edge Function танҳо бо токени корбар (JWT) кор мекунад.</p>
+        <div id="result">Омода барои санҷиш...</div>
     </div>
 
     <script>
+        // Танзимот
         const SUPABASE_URL = "https://seagtlaujnnhoyitgsdd.supabase.co";
         const ANON_KEY = "sb_publishable_OlLChtOja0i8nIrPZuM_Og_vyfGjfsP";
         const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/test-function-html`;
 
-        const _supabase = supabase.createClient(SUPABASE_URL, ANON_KEY);
-
-        // ФУНКСИЯИ ВОРИДШАВӢ
-        async function login() {
-            const resultDiv = document.getElementById("result");
-            const loginBtn = document.getElementById("loginBtn");
-            const sendBtn = document.getElementById("sendBtn");
-            const userInfo = document.getElementById("userInfo");
-
-            try {
-                // Истифодаи Anonymous Sign-in (бояд дар танзимоти Supabase фаъол бошад)
-                // Ё метавонед signInWithPassword-ро истифода баред
-                const { data, error } = await _supabase.auth.signInAnonymously();
-
-                if (error) throw error;
-
-                userInfo.innerHTML = `Шумо ҳамчун корбари муваққатӣ ворид шудед: <br><b>${data.user.id}</b>`;
-                userInfo.style.display = "block";
-                resultDiv.innerHTML = "✅ Шумо ворид шудед! Акнун паём фиристед.";
-                resultDiv.style.color = "#28a745";
-                
-                loginBtn.style.display = "none";
-                sendBtn.disabled = false;
-            } catch (error) {
-                resultDiv.innerHTML = "❌ Хатогии воридшавӣ: " + error.message;
-                resultDiv.style.color = "#dc3545";
-            }
-        }
-
-        // ФУНКСИЯИ ФИРИСТОДАН
         async function sendTest() {
             const resultDiv = document.getElementById("result");
             const btn = document.getElementById("sendBtn");
             
             resultDiv.innerHTML = "⏳ Дархост рафта истодааст...";
             resultDiv.style.color = "#007bff";
+            resultDiv.style.backgroundColor = "transparent";
             btn.disabled = true;
 
             try {
-                const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
-
-                if (sessionError || !session) {
-                    throw new Error("Сессия ёфт нашуд. Лутфан аз нав ворид шавед.");
-                }
-
+                // Фиристодани дархост БЕ санҷиши Auth Session
                 const response = await fetch(FUNCTION_URL, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${session.access_token}` 
+                        "apikey": ANON_KEY,
+                        "Authorization": `Bearer ${ANON_KEY}` // Истифодаи Anon Key ба ҷои User Token
                     },
                     body: JSON.stringify({
-                        message: "🔔 Салом! Ин паём аз браузер тавассути Edge Function омад.",
-                        user_id: session.user.id
+                        message: "🔔 Паёми мустақим бе воридшавӣ!",
+                        user_name: "Меҳмони сомона",
+                        chat_id: "test_channel_001"
                     })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || `Хатогӣ: ${response.status}`);
+                    throw new Error(data.error || `Хатогии сервер: ${response.status}`);
                 }
 
                 resultDiv.innerHTML = "✅ Муваффақият! Паём ба Telegram расид.";
@@ -107,6 +67,7 @@
                 resultDiv.style.backgroundColor = "#eafff0";
 
             } catch (error) {
+                console.error("Error:", error);
                 resultDiv.innerHTML = "❌ Хатогӣ: " + error.message;
                 resultDiv.style.color = "#dc3545";
                 resultDiv.style.backgroundColor = "#fff5f5";
@@ -115,5 +76,6 @@
             }
         }
     </script>
+
 </body>
 </html>
