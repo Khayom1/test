@@ -1,5 +1,2 @@
-aiogram==2.25.1
-supabase==2.3.0
-python-dotenv
-easyocr
-opencv-python-headless
+python-telegram-bot==20.7
+supabase==2.0.4
